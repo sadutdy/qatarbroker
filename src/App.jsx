@@ -17,6 +17,15 @@ const formatPrice = (price) =>
 
 const getPath = () => window.location.pathname;
 
+const navigateTo = (path, setPathname) => {
+  if (window.location.pathname === path) {
+    return;
+  }
+
+  window.history.pushState({}, "", path);
+  setPathname(path);
+};
+
 const updateMetadata = (property) => {
   const title = property
     ? `${property.title} in ${property.location} | Doha Stay Broker`
@@ -64,7 +73,7 @@ function PropertyGallery({ images, title, compact = false }) {
   );
 }
 
-function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, sourceWarning }) {
+function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, sourceWarning, onNavigate }) {
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       const matchQuery = [property.title, property.location, property.area, property.seoArea]
@@ -80,7 +89,14 @@ function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, 
     <>
       <header className="hero">
         <nav className="topbar">
-          <a className="brand" href="/">
+          <a
+            className="brand"
+            href="/"
+            onClick={(event) => {
+              event.preventDefault();
+              onNavigate("/");
+            }}
+          >
             <span className="brand-mark">DS</span>
             <div>
               <p>Doha Stay Broker</p>
@@ -213,7 +229,14 @@ function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, 
                     ))}
                   </div>
 
-                  <a className="detail-link" href={`/rooms/${property.slug}`}>
+                  <a
+                    className="detail-link"
+                    href={`/rooms/${property.slug}`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      onNavigate(`/rooms/${property.slug}`);
+                    }}
+                  >
                     View Room Page
                   </a>
                 </div>
@@ -254,7 +277,7 @@ function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, 
   );
 }
 
-function PropertyDetailsPage({ property }) {
+function PropertyDetailsPage({ property, onNavigate }) {
   const whatsappText = encodeURIComponent(
     `Hi, I want details for ${property.title} in ${property.location}. Please share rent, deposit, and visit time.`
   );
@@ -262,7 +285,14 @@ function PropertyDetailsPage({ property }) {
 
   return (
     <main className="detail-page">
-      <a className="back-link" href="/">
+      <a
+        className="back-link"
+        href="/"
+        onClick={(event) => {
+          event.preventDefault();
+          onNavigate("/");
+        }}
+      >
         Back to all rooms
       </a>
 
@@ -305,12 +335,19 @@ function PropertyDetailsPage({ property }) {
   );
 }
 
-function NotFoundPage() {
+function NotFoundPage({ onNavigate }) {
   return (
     <main className="detail-page not-found-page">
       <p className="eyebrow">Listing not found</p>
       <h1>This room page is not available.</h1>
-      <a className="primary-btn" href="/">
+      <a
+        className="primary-btn"
+        href="/"
+        onClick={(event) => {
+          event.preventDefault();
+          onNavigate("/");
+        }}
+      >
         Back to listings
       </a>
     </main>
@@ -400,6 +437,7 @@ function App() {
       };
 
   const isRoomPage = pathname.startsWith("/rooms/");
+  const handleNavigate = (path) => navigateTo(path, setPathname);
 
   return (
     <>
@@ -407,9 +445,9 @@ function App() {
       <div className="page-shell">
         {isRoomPage ? (
           currentProperty ? (
-            <PropertyDetailsPage property={currentProperty} />
+            <PropertyDetailsPage property={currentProperty} onNavigate={handleNavigate} />
           ) : properties.length > 0 ? (
-            <NotFoundPage />
+            <NotFoundPage onNavigate={handleNavigate} />
           ) : null
         ) : (
           <ListingPage
@@ -420,6 +458,7 @@ function App() {
             properties={properties}
             sourceLabel={sourceLabel}
             sourceWarning={sourceWarning}
+            onNavigate={handleNavigate}
           />
         )}
       </div>
