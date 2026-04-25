@@ -523,6 +523,24 @@ select:focus {
   background: linear-gradient(180deg, #f0e3cc, #f8f3ea);
 }
 
+.locality-button {
+  width: 100%;
+  border: 1px solid rgba(16, 40, 32, 0.08);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.locality-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(16, 40, 32, 0.08);
+}
+
+.locality-button.active {
+  border-color: rgba(27, 67, 50, 0.28);
+  background: linear-gradient(180deg, #dce8df, #eef5f0);
+}
+
 .locality-chip strong,
 .locality-chip span {
   display: block;

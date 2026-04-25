@@ -85,6 +85,27 @@ function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, 
     });
   }, [properties, query, type]);
 
+  const locationOptions = useMemo(() => {
+    const counts = properties.reduce((map, property) => {
+      const key = property.location;
+      map.set(key, (map.get(key) || 0) + 1);
+      return map;
+    }, new Map());
+
+    return [...counts.entries()]
+      .map(([location, count]) => ({ location, count }))
+      .sort((left, right) => right.count - left.count || left.location.localeCompare(right.location));
+  }, [properties]);
+
+  const activateLocationSearch = (location) => {
+    setQuery(location);
+    setType("All");
+    const searchSection = document.getElementById("search");
+    if (searchSection) {
+      searchSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <>
       <header className="hero">
@@ -248,27 +269,30 @@ function ListingPage({ query, setQuery, type, setType, properties, sourceLabel, 
         <section className="seo-section">
           <div className="section-heading">
             <p className="eyebrow">Local SEO</p>
-            <h2>Broker-listed rentals in Doha’s top demand zones</h2>
+            <h2>Browse locations as quick search shortcuts</h2>
           </div>
 
           <div className="seo-content">
             <p>
-              If you are searching for rooms for rent in Al Sadd, studio apartments in Old Airport, private rooms in
-              West Bay, or flats for rent in Lusail, Doha Stay Broker Services helps renters find verified local
-              options quickly.
+              These location buttons are built from your live listing data, so when you grow to 100+ rooms the bottom
+              section will automatically stay in sync with the sheet.
             </p>
             <p>
-              We focus on high-demand rental neighborhoods in Doha and help with room visits, nearby landmark
-              guidance, expected deposits, and move-in coordination for workers, couples, executives, and families.
+              Tap any location below to instantly fill the search box and show matching room details for that area.
             </p>
           </div>
 
           <div className="locality-list">
-            {broker.areas.map((area) => (
-              <div key={area} className="locality-chip">
-                <strong>{area}</strong>
-                <span>{`Vacant rooms and apartments in ${area}, Doha`}</span>
-              </div>
+            {locationOptions.map(({ location, count }) => (
+              <button
+                key={location}
+                type="button"
+                className={`locality-chip locality-button${query === location ? " active" : ""}`}
+                onClick={() => activateLocationSearch(location)}
+              >
+                <strong>{location}</strong>
+                <span>{`${count} listing${count > 1 ? "s" : ""} available`}</span>
+              </button>
             ))}
           </div>
         </section>
